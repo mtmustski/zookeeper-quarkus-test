@@ -7,6 +7,8 @@ import jakarta.enterprise.event.ObservesAsync;
 import jakarta.enterprise.inject.spi.EventContext;
 import jakarta.enterprise.inject.spi.ObserverMethod;
 import jakarta.inject.Inject;
+
+import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.ZooKeeper;
 
@@ -22,5 +24,23 @@ public class ZookeeperService implements AsyncObserverExceptionHandler {
 
     @Override
     public void handle(Throwable throwable, ObserverMethod<?> observerMethod, EventContext<?> eventContext) {
+    }
+
+    public boolean testNode(String path) {
+        try {
+            return client.exists(path, false) != null;
+        } catch (KeeperException | InterruptedException e) {
+            Log.error("Umpf", e);
+            return false;
+        }
+    }
+
+    public byte[] getData(String path) {
+        try {
+            return client.getData(path, false, client.exists(path, false));
+        } catch (KeeperException | InterruptedException e) {
+            Log.error("Umpf", e);
+            return new byte[] {};
+        }
     }
 }
